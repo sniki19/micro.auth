@@ -1,0 +1,15 @@
+.git/
+.gitignore
+node_modules/
+.vscode/
+dist/
+
+.dockerignore
+docker-compose*.yaml
+Dockerfile
+Makefile
+.env.*
+README.*
+.editorconfig
+.prettierrc
+eslint.config.*
