@@ -1,0 +1,22 @@
+model Outbox {
+  id String @id @default(uuid())
+
+  event_id     String    @unique
+  event_type   String
+  event_data   Json
+  status       String    @default("PENDING")
+  created_at   DateTime  @default(now())
+  processed_at DateTime?
+
+  @@index([status])
+  @@index([created_at])
+  @@map("outbox")
+}
+
+enum Status {
+  PENDING
+  PROCESSED
+  FAILED
+
+  @@map("status_enum")
+}

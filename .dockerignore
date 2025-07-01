@@ -1,15 +1,16 @@
-.git/
+.git
 .gitignore
-node_modules/
-.vscode/
-dist/
+node_modules
+.vscode
+dist
 
+*.log
 .dockerignore
 docker-compose*.yaml
 Dockerfile
 Makefile
 .env.*
-README.*
+*.md
 .editorconfig
 .prettierrc
 eslint.config.*

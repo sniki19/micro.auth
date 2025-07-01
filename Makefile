@@ -1,9 +1,11 @@
-include .env
+include .env.production
 
 echo:
-	echo App: "${APP_NAME}" v.${APP_VERSION}
+	@echo App: "${APP_NAME}" v.${APP_VERSION}
 
-ENV_COMPOSE_FILE := docker-compose.yaml
+COMPOSE_FILE := docker-compose.yaml
+ENV_FILE := .env.production
+DC := docker compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE)
 
 net.create:
 	docker network create --driver bridge ${DOCKER_NETWORK}
@@ -20,13 +22,13 @@ vol.remove:
 	docker volume ls
 
 up.db:
-	docker compose -f $(ENV_COMPOSE_FILE) up -d ${DOCKER_DB_CONTAINER}
+	$(DC) up -d ${DOCKER_DB_CONTAINER}
 down.db:
-	docker compose -f $(ENV_COMPOSE_FILE) down ${DOCKER_DB_CONTAINER}
+	$(DC) down ${DOCKER_DB_CONTAINER}
 start.db:
-	docker compose -f $(ENV_COMPOSE_FILE) start ${DOCKER_DB_CONTAINER}
+	$(DC) start ${DOCKER_DB_CONTAINER}
 stop.db:
-	docker compose -f $(ENV_COMPOSE_FILE) stop ${DOCKER_DB_CONTAINER}
+	$(DC) stop ${DOCKER_DB_CONTAINER}
 
 up.env:
 	make up.db
@@ -37,13 +39,47 @@ start.env:
 stop.env:
 	make stop.db
 
+build.app:
+	@echo Build Docker image...
+	$(DC) build ${DOCKER_APP_CONTAINER}
+	docker image ls
+remove.app:
+	@echo Remove Docker image...
+	$(DC) down --rmi local
+	docker image ls
+up.app:
+	@echo Up Docker container ${DOCKER_APP_CONTAINER}...
+	$(DC) up -d ${DOCKER_APP_CONTAINER}
+down.app:
+	@echo Down Docker container ${DOCKER_APP_CONTAINER}...
+	$(DC) down ${DOCKER_APP_CONTAINER}
+start.app:
+	@echo Starting container ${DOCKER_APP_CONTAINER} with production env...
+	$(DC) start ${DOCKER_APP_CONTAINER}
+stop.app:
+	@echo Stopping container ${DOCKER_APP_CONTAINER}...
+	$(DC) stop ${DOCKER_APP_CONTAINER}
+
+build:
+	make build.app
+	docker image ls
+remove:
+	make remove.app
+	docker image ls
 up:
 	make up.env
+	make build.app
+	make up.app
 	docker ps -a
+	@echo ${DOCKER_APP_CONTAINER} deployed!
 down:
+	make down.app
+	make remove.app
 	make down.env
 	docker ps -a
 start:
 	make start.env
+	make start.app
 stop:
+	make stop.app
 	make stop.env

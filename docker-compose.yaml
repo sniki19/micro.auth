@@ -10,6 +10,20 @@ volumes:
     external: true
 
 services:
+  pga_phantom_koala:
+    image: dpage/pgadmin4:latest
+    container_name: pga_phantom_koala
+    restart: unless-stopped
+    ports:
+      - 9555:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    # volumes:
+    #   - pgadmin_viewer_si1:/var/lib/pgadmin
+    networks:
+      - micro_network
+
   db_runesteel_overlord:
     image: postgres:latest
     container_name: db_runesteel_overlord
@@ -29,5 +43,24 @@ services:
       retries: 5
     volumes:
       - db_micro_auth_si1:/var/lib/postgresql/data
+    networks:
+      - micro_network
+
+  app_ninja_minotaur:
+    image: ${APP_NAME}:latest
+    container_name: app_ninja_minotaur
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - ${API_PORT}:${API_PORT}
+    depends_on:
+      db_runesteel_overlord:
+        condition: service_healthy
+        restart: true
+    environment:
+      API_PORT: ${API_PORT}
+      NODE_ENV: production
     networks:
       - micro_network
