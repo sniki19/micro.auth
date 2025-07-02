@@ -1,15 +1,16 @@
 model Outbox {
   id String @id @default(uuid())
 
-  event_id     String    @unique
-  event_type   String
-  event_data   Json
-  status       String    @default("PENDING")
-  created_at   DateTime  @default(now())
-  processed_at DateTime?
+  eventId   String @unique @default(cuid()) @map("event_id")
+  eventType String @map("event_type")
+  eventData Json   @map("event_data")
+  status    String @default("PENDING")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  processedAt DateTime? @map("processed_at")
 
   @@index([status])
-  @@index([created_at])
+  @@index([createdAt])
   @@map("outbox")
 }
 

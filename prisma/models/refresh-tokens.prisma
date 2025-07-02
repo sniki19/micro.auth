@@ -1,0 +1,13 @@
+model RefreshToken {
+  id String @id @default(uuid())
+
+  userId      String   @map("user_id")
+  token       String
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  fingerprint String?
+
+  user AuthCredentials @relation(fields: [userId], references: [userId], map: "refresh_tokens_auth_credentials_fkey")
+
+  @@map("refresh_tokens")
+}

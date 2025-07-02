@@ -7,6 +7,9 @@ import { IsEmailOrPhone } from 'src/validators/email-or-phone.decorator'
 export class CreateAuthCredentialDto {
   @IsOptional()
   @IsString({ message: 'Имя пользователя должно быть строкой' })
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    message: 'Имя пользователя может содержать только буквы, цифры и подчеркивания'
+  })
   username?: string
 
   @Transform((params: TransformFnParams) => {
@@ -18,6 +21,9 @@ export class CreateAuthCredentialDto {
 
   @IsOptional()
   @IsPhoneNumber(undefined, { message: 'Телефон должен быть в формате +123456789' })
+  @Matches(/^\+?\d{10,15}$/, {
+    message: 'Телефон должен содержать от 10 до 15 цифр, можно с + в начале'
+  })
   phone?: string
 
   @IsEmailOrPhone()
@@ -28,4 +34,11 @@ export class CreateAuthCredentialDto {
     message: 'Пароль слишком слабый. Используйте буквы (A-Z, a-z), цифры и спецсимволы'
   })
   password: string
+
+  @IsNotEmpty()
+  @IsString()
+  // @ValidateIf(o => o.password !== o.passwordСonfirm, {
+  //   message: 'Пароли не совпадают'
+  // })
+  passwordСonfirm: string
 }

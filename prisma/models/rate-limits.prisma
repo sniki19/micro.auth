@@ -1,0 +1,14 @@
+model RateLimit {
+  id String @id @default(uuid())
+
+  serviceName        String @map("service_name") @db.VarChar(256)
+  maxAttempts        Int    @map("max_attempts")
+  windowsSizeSeconds Int    @map("windows_size_seconds")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userAuthAttempt UserAuthAttempt[]
+
+  @@map("rate_limits")
+}

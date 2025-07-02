@@ -1,0 +1,19 @@
+model UserSecuritySettings {
+  userId String @id @unique @map("user_id")
+
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  sessionTimeout      Int?      @map("session_timeout")
+  loginNotifications  Boolean   @default(false) @map("login_notifications")
+  twoFactorEnabled    Boolean   @default(false) @map("two_factor_enabled")
+  twoFactorMethod     String?   @map("two_factor_method")
+  accountBlocked      Boolean   @default(false) @map("account_blocked")
+  blockedUntil        DateTime? @map("blocked_until")
+  blockReason         String?   @map("block_reason")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user AuthCredentials @relation(fields: [userId], references: [userId], map: "user_security_settings_auth_credentials_fkey")
+
+  @@map("user_security_settings")
+}

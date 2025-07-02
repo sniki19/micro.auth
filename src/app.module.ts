@@ -4,6 +4,7 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { PrismaModule } from './prisma/prisma.module'
 import { AuthCredentialsModule } from './auth-credentials/auth-credentials.module'
+import { OutboxModule } from './outbox/outbox.module';
 
 
 @Module({
@@ -14,7 +15,8 @@ import { AuthCredentialsModule } from './auth-credentials/auth-credentials.modul
       isGlobal: true
     }),
     PrismaModule,
-    AuthCredentialsModule
+    AuthCredentialsModule,
+    OutboxModule
   ],
   controllers: [AppController],
   providers: [AppService]
