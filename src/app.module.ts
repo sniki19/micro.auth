@@ -1,22 +1,28 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { AuthModule } from './auth/auth.module'
+import { ConfigModule } from './config/config.module'
+import { FingerprintModule } from './fingerprint/fingerprint.module'
+import { JwtTokenModule } from './jwt-token/jwt-token.module'
+import { LoggerModule } from './logger/logger.module'
 import { PrismaModule } from './prisma/prisma.module'
-import { AuthCredentialsModule } from './auth-credentials/auth-credentials.module'
-import { OutboxModule } from './outbox/outbox.module';
+import { SessionModule } from './session/session.module'
+import { SchedulerModule } from './tasks/scheduler/scheduler.module'
+import { UserModule } from './user/user.module'
 
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV}`,
-      ignoreEnvFile: process.env.NODE_ENV === 'production',
-      isGlobal: true
-    }),
+    ConfigModule,
+    LoggerModule,
     PrismaModule,
-    AuthCredentialsModule,
-    OutboxModule
+    AuthModule,
+    JwtTokenModule,
+    SessionModule,
+    UserModule,
+    FingerprintModule,
+    SchedulerModule
   ],
   controllers: [AppController],
   providers: [AppService]

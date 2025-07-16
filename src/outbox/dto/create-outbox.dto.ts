@@ -1,14 +1,14 @@
-import { IsString, IsNotEmpty, IsIn, IsObject, IsOptional, IsDateString } from 'class-validator'
-import { Type } from 'class-transformer'
 import { ApiProperty } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
+import { IsDateString, IsIn, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator'
 import { OutboxEventType, OutboxStatus } from '../constants'
 
 
 export class CreateOutboxDto {
   @ApiProperty({
+    description: 'Тип события',
     enum: Object.values(OutboxEventType),
-    example: OutboxEventType.USER_CREATED,
-    description: 'Тип события'
+    example: OutboxEventType.USER_REGISTERED
   })
   @IsString()
   @IsIn(Object.values(OutboxEventType))
@@ -16,8 +16,8 @@ export class CreateOutboxDto {
   eventType: OutboxEventType
 
   @ApiProperty({
-    example: { userId: '123', username: 'test' },
-    description: 'Данные события в формате JSON'
+    description: 'Данные события в формате JSON',
+    example: { userId: '123', email: 'user@site.com' }
   })
   @IsObject()
   @IsNotEmpty()
@@ -25,9 +25,9 @@ export class CreateOutboxDto {
   eventData: Record<string, any>
 
   @ApiProperty({
+    description: 'Статус обработки события',
     enum: Object.values(OutboxStatus),
     example: OutboxStatus.PENDING,
-    description: 'Статус обработки события',
     default: OutboxStatus.PENDING
   })
   @IsString()
@@ -36,9 +36,9 @@ export class CreateOutboxDto {
   status?: OutboxStatus = OutboxStatus.PENDING
 
   @ApiProperty({
-    example: '2023-05-15T10:00:05Z',
     description: 'Дата обработки события',
-    required: false,
+    example: '2023-05-15T10:00:05Z',
+    required: false
   })
   @IsDateString()
   @IsOptional()

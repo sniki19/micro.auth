@@ -1,5 +1,5 @@
 export const OutboxEventType = {
-  USER_CREATED: 'UserCreated',
+  USER_REGISTERED: 'UserRegistered',
   PASSWORD_CHANGED: 'PasswordChanged',
   ACCOUNT_BLOCKED: 'AccountBlocked',
   EMAIL_VERIFIED: 'EmailVerified',

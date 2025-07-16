@@ -1,13 +1,21 @@
 import { join } from 'path'
-import { NestFactory } from '@nestjs/core'
 import { ValidationPipe } from '@nestjs/common'
+import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
+import { Logger } from 'nestjs-pino'
+import { setupApiDocs } from './api-docs/api-docs.setup'
 import { AppModule } from './app.module'
-import { setupOpenApi } from './utils/openapi.util'
+import { ExceptionsFilter } from './common/filters'
+import { ResponseInterceptor } from './common/interceptors'
 
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true
+  })
+
+  const logger = app.get(Logger)
+  app.useLogger(logger)
 
   app.useStaticAssets(join(process.cwd(), 'src', 'assets'), {
     prefix: '/assets/'
@@ -19,7 +27,11 @@ async function bootstrap() {
     forbidNonWhitelisted: true
   }))
 
-  setupOpenApi(app, {
+  app.useGlobalInterceptors(new ResponseInterceptor())
+
+  app.useGlobalFilters(new ExceptionsFilter(logger))
+
+  setupApiDocs(app, {
     swagger: true,
     rapidoc: true
   })

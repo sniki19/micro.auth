@@ -1,37 +1,51 @@
 import { Injectable } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
-import { Outbox } from '@prisma/client'
 import { CreateOutboxDto } from './dto/create-outbox.dto'
-import { UpdateOutboxDto } from './dto/update-outbox.dto'
 
 
 @Injectable()
 export class OutboxService {
   constructor(private readonly prisma: PrismaService) { }
 
-  async findAll(): Promise<Outbox[]> {
-    return this.prisma.outbox.findMany()
+  async addEvent(dto: CreateOutboxDto) {
+    return this.prisma.outbox.create({
+      data: dto
+    })
   }
 
-  async create(dto: CreateOutboxDto): Promise<Outbox> {
-    const item = await this.prisma.outbox.create({
-      data: { ...dto }
+  async addEventWithTransaction(dto: CreateOutboxDto, prismaTx: Prisma.TransactionClient) {
+    return prismaTx.outbox.create({
+      data: dto
     })
-    return item
   }
 
-  async update(id: string, dto: UpdateOutboxDto): Promise<Outbox> {
-    const item = await this.prisma.outbox.update({
-      where: { id },
-      data: { ...dto }
+  async getPendingEvents(limit = 100) {
+    return this.prisma.outbox.findMany({
+      where: { status: 'PENDING' },
+      take: limit,
+      orderBy: { createdAt: 'asc' }
     })
-    return item
   }
 
-  async delete(id: string): Promise<string> {
-    await this.prisma.outbox.delete({
-      where: { id }
+  async markEventAsProcessed(eventId: string) {
+    return this.prisma.outbox.update({
+      where: { eventId },
+      data: {
+        status: 'PROCESSED',
+        processedAt: new Date()
+      }
     })
-    return id
+  }
+
+  async markEventAsFailed(eventId: string, error?: string) {
+    return this.prisma.outbox.update({
+      where: { eventId },
+      data: {
+        status: 'FAILED',
+        processedAt: new Date(),
+        error
+      }
+    })
   }
 }
