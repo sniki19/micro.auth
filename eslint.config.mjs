@@ -33,7 +33,8 @@ export default tseslint.config(
     },
     rules: {
       'semi': ['warn', 'never'],
-      'import/newline-after-import': ['warn', { count: 2 }],
+      'import/newline-after-import': ['error', { count: 2 }],
+      'no-multiple-empty-lines': ['error', { 'max': 2, 'maxEOF': 1 }],
       'prettier/prettier': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
@@ -43,6 +44,7 @@ export default tseslint.config(
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
       ],
       '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/require-await': 'warn',
       'import/order': [
         'error',
         {
@@ -55,9 +57,35 @@ export default tseslint.config(
             'index'
           ],
           'newlines-between': 'never',
+          'alphabetize': {
+            order: 'asc',
+            caseInsensitive: true
+          }
+        }
+      ],
+      'max-len': [
+        'error',
+        {
+          code: 120,
+          ignoreUrls: true,
+          ignoreStrings: false,
+          ignoreTemplateLiterals: true,
+          ignoreRegExpLiterals: true,
+          ignoreComments: true,
+          ignoreTrailingComments: true,
+          ignorePattern: '^\\s*<'
+        }
+      ],
+      'sort-imports': [
+        'error',
+        {
+          ignoreCase: true,
+          ignoreDeclarationSort: true,
+          ignoreMemberSort: false,
+          memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single']
         }
       ]
     }
   },
-  prettierConfig
+  // prettierConfig
 )
