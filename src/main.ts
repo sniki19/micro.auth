@@ -3,10 +3,10 @@ import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { Logger } from 'nestjs-pino'
-import { setupApiDocs } from './api-docs/api-docs.setup'
 import { AppModule } from './app.module'
 import { ExceptionsFilter } from './common/filters'
 import { ResponseInterceptor } from './common/interceptors'
+import { setupApiDocs } from './static/api-docs/api-docs.setup'
 
 
 async function bootstrap() {

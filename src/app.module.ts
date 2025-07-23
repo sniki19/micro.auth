@@ -1,28 +1,30 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { AuthModule } from './auth/auth.module'
-import { ConfigModule } from './config/config.module'
-import { FingerprintModule } from './fingerprint/fingerprint.module'
-import { JwtTokenModule } from './jwt-token/jwt-token.module'
-import { LoggerModule } from './logger/logger.module'
-import { PrismaModule } from './prisma/prisma.module'
-import { SessionModule } from './session/session.module'
-import { SchedulerModule } from './tasks/scheduler/scheduler.module'
-import { UserModule } from './user/user.module'
+import { EnvConfigModule } from './core/env-config/env-config.module'
+import { PrismaModule } from './infrastructure/database/prisma.module'
+import { LoggerModule } from './infrastructure/logger/logger.module'
+import { OutboxModule } from './infrastructure/outbox/outbox.module'
+import { SchedulerModule } from './infrastructure/scheduler/scheduler.module'
+import { AuthModule } from './modules/auth/auth.module'
+import { UserModule } from './modules/user/user.module'
+import { FingerprintModule } from './security/fingerprint/fingerprint.module'
+import { JwtTokenModule } from './security/jwt-token/jwt-token.module'
+import { SessionModule } from './security/session/session.module'
 
 
 @Module({
   imports: [
-    ConfigModule,
+    EnvConfigModule,
     LoggerModule,
     PrismaModule,
+    OutboxModule,
+    SchedulerModule,
     AuthModule,
-    JwtTokenModule,
-    SessionModule,
     UserModule,
     FingerprintModule,
-    SchedulerModule
+    JwtTokenModule,
+    SessionModule
   ],
   controllers: [AppController],
   providers: [AppService]
