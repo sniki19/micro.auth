@@ -39,7 +39,7 @@ export class AuthService {
 
   async register(registerDto: RegisterRequest): Promise<Pick<UserAuthCredentials, 'userId'>> {
     const { email, phone, password } = registerDto
-    this.logger.info('Starting user registration process', { email, phone })
+    this.logger.info('🪪 Starting user registration process', { email, phone })
 
     const allowToCreateNewUserWithCredentials = !(await this.userService.validateUserExists(email, phone))
     if (!allowToCreateNewUserWithCredentials) {
@@ -82,9 +82,10 @@ export class AuthService {
 
   async login(loginDto: LoginRequest, fingerprintOptions?: FingerprintOptions): Promise<AuthResponse> {
     const { email, phone } = loginDto
-    this.logger.info('Login attempt for user', { email, phone }, fingerprintOptions)
+    this.logger.info('🔑 Starting login', { email, phone }, fingerprintOptions)
+
     const { userId } = await this.validateUser(loginDto)
-    this.logger.info(`User validated successfully`, { userId })
+    this.logger.success('User validated successfully', { userId })
 
     const { accessToken, refreshToken } = this.jwtTokenService.generateTokens(userId)
 
@@ -115,7 +116,7 @@ export class AuthService {
         ])
       })
 
-      this.logger.info(`Login successful`, { userId })
+      this.logger.success('Login successful', { userId })
       return { accessToken }
     } catch (error: unknown) {
       this.logger.error('Login transaction failed', { error, userId, fingerprintOptions })
@@ -124,7 +125,7 @@ export class AuthService {
   }
 
   async logout(userId: string, accessToken: string): Promise<void> {
-    this.logger.info(`Starting logout process`, { userId })
+    this.logger.info('🔒 Starting logout process', { userId })
 
     try {
       await this.prisma.$transaction(async (prismaTx) => {
@@ -150,7 +151,7 @@ export class AuthService {
         ])
       })
 
-      this.logger.info(`Logout successful`, { userId })
+      this.logger.success('Logout successful', { userId })
     } catch (error: unknown) {
       this.logger.error('Logout transaction failed', { userId, error })
       throw new InternalServerErrorException('Logout failed due to a database error')
@@ -162,7 +163,7 @@ export class AuthService {
     accessToken: string,
     fingerprintOptions?: FingerprintOptions
   ): Promise<AuthResponse> {
-    this.logger.info(`Token refresh requested`, { userId })
+    this.logger.info('🔄 Token refresh requested', { userId })
 
     const refreshToken = await this.refreshTokenService.getToken(userId, fingerprintOptions)
     if (!refreshToken) {
@@ -173,18 +174,18 @@ export class AuthService {
     const tokens = this.jwtTokenService.generateTokens(refreshToken)
 
     await this.refreshTokenService.rotateToken(userId, refreshToken, tokens.refreshToken, fingerprintOptions)
-    this.logger.info(`Token refreshed successfully`, { userId })
+    this.logger.success('Token refreshed successfully', { userId })
 
     return { accessToken }
   }
 
   private async validateUser(loginDto: LoginRequest, ipAddress?: string): Promise<UserAuthCredentials> {
     const { email, phone, password } = loginDto
-    this.logger.info(`Validating user credentials`, { email, phone })
+    this.logger.info('Validating user credentials', { email, phone })
 
     const user = await this.userService.findUser(email, phone)
     if (!user) {
-      this.logger.warn(`User not found`, { email, phone, ipAddress })
+      this.logger.warn('User not found', { email, phone, ipAddress })
       throw new NotFoundException('User not found')
     }
 
@@ -197,14 +198,14 @@ export class AuthService {
       const now = new Date()
 
       if (user.userSecuritySettings.blockedUntil && user.userSecuritySettings.blockedUntil > now) {
-        this.logger.warn(`Blocked login attempt`, {
+        this.logger.warn('🔒 Blocked login attempt', {
           userId: user.userId,
           blockedUntil: user.userSecuritySettings.blockedUntil,
           blockReason: user.userSecuritySettings.blockReason
         })
         throw new UnauthorizedException('Account is temporarily blocked')
       } else {
-        this.logger.info('Unblocking user as block period has passed', { userId: user.userId })
+        this.logger.info('🔓 Unblocking user as block period has passed', { userId: user.userId })
         await this.prisma.userSecuritySettings.update({
           where: { userId: user.userId },
           data: {
@@ -218,7 +219,7 @@ export class AuthService {
 
     const isPasswordValid = await this.passwordService.comparePassword(password, user.password)
     if (!isPasswordValid) {
-      this.logger.warn(`Invalid password attempt`, { userId: user.userId, ipAddress })
+      this.logger.warn('Invalid password attempt', { userId: user.userId, ipAddress })
       await this.rateLimitService.trackFailedLoginAttempt(user.userId, ipAddress)
       throw new UnauthorizedException('Invalid credentials')
     }
@@ -232,7 +233,7 @@ export class AuthService {
       })
     }
 
-    this.logger.info('User validation successful', { userId: user.userId })
+    this.logger.success('User validation successful', { userId: user.userId })
     return user
   }
 }

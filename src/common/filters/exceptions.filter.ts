@@ -17,13 +17,14 @@ export class ExceptionsFilter implements ExceptionFilter {
     const status = exception instanceof HttpException
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR
+
     const message = exception instanceof HttpException
       ? exception.message
       : getReasonPhrase(HttpStatus.INTERNAL_SERVER_ERROR)
 
     this.logger.error(message, {
-      exception,
-      path: request.url
+      path: request.url,
+      exception
     })
 
     response.status(status).json({

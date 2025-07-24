@@ -13,8 +13,9 @@ import { EnvConfigService } from './env-config.service'
       validationSchema: envValidationSchema,
       validationOptions: {
         abortEarly: false,
-        allowUnknown: false
-      }
+        allowUnknown: true // TODO: false
+      },
+      isGlobal: true
     })
   ],
   providers: [EnvConfigService],

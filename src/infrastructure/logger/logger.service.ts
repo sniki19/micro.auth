@@ -8,11 +8,12 @@ export class CustomLogger {
 
   withContext(context: string) {
     return {
-      log: (...args: unknown[]) => this.info({ context }, ...args),
-      info: (...args: unknown[]) => this.info({ context }, ...args),
-      debug: (...args: unknown[]) => this.debug({ context }, ...args),
-      warn: (...args: unknown[]) => this.warn({ context }, ...args),
-      error: (...args: unknown[]) => this.error({ context }, ...args)
+      log: (message: string, ...args: unknown[]) => this.log(message, ...args, { context }),
+      info: (message: string, ...args: unknown[]) => this.info(message, ...args, { context }),
+      success: (message: string, ...args: unknown[]) => this.success(message, ...args, { context }),
+      debug: (message: string, ...args: unknown[]) => this.debug(message, ...args, { context }),
+      warn: (message: string, ...args: unknown[]) => this.warn(message, ...args, { context }),
+      error: (message: string, ...args: unknown[]) => this.error(message, ...args, { context })
     }
   }
 
@@ -20,49 +21,61 @@ export class CustomLogger {
     level: 'info' | 'debug' | 'warn' | 'error',
     ...args: unknown[]
   ): void {
-    let logObject: Record<string, unknown>
+    let logObject: Record<string, unknown> = {}
+    let message = ''
 
-    if (args.length === 0) {
-      logObject = { msg: 'Empty log message' }
-    } else if (typeof args[0] === 'string') {
-      logObject = {
-        msg: args[0],
-        ...this.mergeObjects(args.slice(1))
-      }
-    } else {
-      logObject = this.mergeObjects(args)
+    if (args.length > 0 && typeof args[0] === 'string') {
+      message = args[0]
+      args = args.slice(1)
     }
 
-    this.logger[level](logObject)
+    logObject = this.mergeObjects(args)
+
+    const orderedLogObject: Record<string, unknown> = {}
+
+    if (logObject.context) {
+      orderedLogObject.context = logObject.context
+      delete logObject.context
+    }
+
+    if (message) {
+      orderedLogObject.msg = message
+    }
+
+    this.logger[level]({ ...orderedLogObject, ...logObject })
   }
 
   private mergeObjects(objects: unknown[]): Record<string, unknown> {
-    return objects.reduce((acc: object, obj) => {
-      if (typeof obj === 'object' && obj !== null) {
+    return objects.reduce((acc: Record<string, unknown>, obj) => {
+      if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
         return { ...acc, ...obj }
       }
       return acc
     }, {}) as Record<string, unknown>
   }
 
-  log(...args: unknown[]): void {
-    this.logWithLevel('info', ...args)
+  log(message: string, ...args: unknown[]): void {
+    this.logWithLevel('info', message, ...args)
   }
 
-  info(...args: unknown[]): void {
-    this.logWithLevel('info', ...args)
+  info(message: string, ...args: unknown[]): void {
+    this.logWithLevel('info', message, ...args)
   }
 
-  debug(...args: unknown[]): void {
-    this.logWithLevel('debug', ...args)
+  success(message: string, ...args: unknown[]): void {
+    this.logWithLevel('info', `✅ ${message}`, ...args)
   }
 
-  warn(...args: unknown[]): void {
-    this.logWithLevel('warn', ...args)
+  debug(message: string, ...args: unknown[]): void {
+    this.logWithLevel('debug', message, ...args)
   }
 
-  error(...args: unknown[]): void {
-    this.logWithLevel('error', ...args)
+  warn(message: string, ...args: unknown[]): void {
+    this.logWithLevel('warn', `⚠️ ${message}`, ...args)
+  }
+
+  error(message: string, ...args: unknown[]): void {
+    this.logWithLevel('error', `❌ ${message}`, ...args)
   }
 }
 

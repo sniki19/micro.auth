@@ -17,7 +17,10 @@ export class UserService {
   }
 
   async findUser(email?: string, phone?: string) {
+    this.logger.info('🔍 Searching for user', { email, phone })
+
     if (!email && !phone) {
+      this.logger.warn('Empty search criteria provided for user')
       return null
     }
 
@@ -35,11 +38,14 @@ export class UserService {
   }
 
   async validateUserExists(email?: string, phone?: string) {
+    this.logger.info('Validating user exists', { email, phone })
+
     if (!email && !phone) {
+      this.logger.warn('Validation failed - no criteria provided')
       throw new BadRequestException('Некорректные данные')
     }
 
-    const existingUser = await this.prisma.userAuthCredentials.findFirst({
+    const user = await this.prisma.userAuthCredentials.findFirst({
       where: {
         OR: [
           { email },
@@ -51,10 +57,13 @@ export class UserService {
       }
     })
 
-    return !!existingUser
+    return !!user
   }
 
   async createUser(payload: CreateUserPayload, transactionOptions?: TransactionOptions) {
+    const { email, phone } = payload
+    this.logger.info('🆕👤 Creating new user', { email, phone })
+
     const dbClient = transactionOptions?.prismaTx || this.prisma
 
     return dbClient.userAuthCredentials.create({
