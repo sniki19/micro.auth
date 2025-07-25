@@ -13,7 +13,7 @@ export class AppService {
   }
 
   getHello(): string {
-    this.logger.log('Hello Micro.auth!')
+    this.logger.info('Hello Micro.auth!')
     return 'Hello Micro.auth!'
   }
 }
