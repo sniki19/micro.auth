@@ -1,5 +1,5 @@
-import { LoggerMock } from 'test/mock/logger.mock'
-import { createTestModule } from '../test/test-utils'
+import { LoggerMock } from '@test/mock/logger.mock'
+import { createTestModule } from '@test/test-utils'
 import { AppService } from './app.service'
 
 

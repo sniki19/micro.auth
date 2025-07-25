@@ -1,4 +1,4 @@
-import { createTestModule } from '../test/test-utils'
+import { createTestModule } from '@test/test-utils'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 

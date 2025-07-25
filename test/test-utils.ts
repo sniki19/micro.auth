@@ -1,6 +1,6 @@
+import { CustomLogger } from '@app/infrastructure/logger/logger.service'
 import { Provider } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
-import { CustomLogger } from '../src/infrastructure/logger/logger.service'
 import { createLoggerMock } from './mock/logger.mock'
 
 

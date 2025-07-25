@@ -1,3 +1,4 @@
+import { CustomLogger, CustomLoggerWithContext } from '@logger/logger.service'
 import {
   ConflictException,
   Injectable,
@@ -7,7 +8,6 @@ import {
 } from '@nestjs/common'
 import { UserAuthCredentials } from '@prisma/client'
 import { PrismaService } from 'src/infrastructure/database/prisma.service'
-import { CustomLogger, CustomLoggerWithContext } from 'src/infrastructure/logger/logger.service'
 import { OutboxService } from 'src/infrastructure/outbox/outbox.service'
 import { UserService } from 'src/modules/user/user.service'
 import { FingerprintOptions } from 'src/security/fingerprint/interfaces'
