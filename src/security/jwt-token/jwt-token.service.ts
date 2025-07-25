@@ -17,6 +17,7 @@ export class JwtTokenService {
     private readonly jwtService: JwtService
   ) {
     this.logger = this.customLogger.withContext(JwtTokenService.name)
+
     this.tokenConfigs = {
       [TokenType.ACCESS]: {
         secret: this.config.JWT_ACCESS_TOKEN_SECRET,
@@ -30,44 +31,58 @@ export class JwtTokenService {
   }
 
   verifyRefreshToken(token: string) {
+    this.logger.info('🛡️ Verifying refresh token')
     return this.verifyToken(token, TokenType.REFRESH)
   }
 
   private verifyToken(token: string, type: TokenType): JwtTokenPayload {
     try {
+      this.logger.debug('Verifying token', { type })
       const config = this.tokenConfigs[type]
-      return this.jwtService.verify(token, { secret: config.secret })
+      const payload = this.jwtService.verify<JwtTokenPayload>(token, { secret: config.secret })
+
+      this.logger.debug('Token verified successfully', { userId: payload.sub })
+      return payload
     } catch (error: unknown) {
-      this.logger.info(`Invalid or expired token: ${error instanceof Error ? error.message : String(error)}`)
+      this.logger.warn('Invalid or expired token', { error })
       throw new UnauthorizedException('Invalid or expired token')
     }
   }
 
   generateTokens(userId: string) {
+    this.logger.info('⚡ Generating tokens for user', { userId })
     const payload: JwtTokenPayload = { sub: userId }
 
-    return {
+    const tokens = {
       accessToken: this.generateToken(payload, TokenType.ACCESS),
       refreshToken: this.generateToken(payload, TokenType.REFRESH)
     }
+
+    this.logger.success('Tokens generated successfully', { userId })
+    return tokens
   }
 
   private generateToken(payload: JwtTokenPayload, type: TokenType): string {
     try {
+      this.logger.debug('Generating token', { type, payload: { sub: payload.sub } })
       const config = this.tokenConfigs[type]
-      return this.jwtService.sign(payload, {
+      const token = this.jwtService.sign(payload, {
         ...config
       })
+      this.logger.success('Token generated successfully', { type, userId: payload.sub })
+      return token
     } catch (error: unknown) {
-      this.logger.info(`Token generation failed: ${error instanceof Error ? error.message : String(error)}`)
+      this.logger.error('Token generation failed', { error })
       throw new UnauthorizedException('Token generation failed')
     }
   }
 
   getTokenExpirationDate(token: string): Date {
+    this.logger.info('Getting token expiration date')
     const decoded: { exp?: number } = this.jwtService.decode(token)
 
     if (!decoded.exp) {
+      this.logger.warn('Invalid token - no expiration date', { token })
       throw new BadRequestException('Invalid token: unable to determine expiration date')
     }
     return new Date(decoded.exp * 1000)
@@ -75,20 +90,23 @@ export class JwtTokenService {
 
   getTokenExpiresIn(token: string): number | null {
     try {
+      this.logger.info('Getting token expires in')
       const decoded: { exp?: number } = this.jwtService.decode(token)
       if (!decoded?.exp) {
+        this.logger.warn('Token has no expiration', { token })
         return null
       }
 
       const currentTimestamp = Math.floor(Date.now() / 1000)
       return decoded.exp - currentTimestamp
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (error: unknown) {
+      this.logger.warn('Failed to get token expiration', { error })
       return null
     }
   }
 
   isTokenExpired(token: string): boolean {
+    this.logger.info('Checking if token is expired')
     const expiresIn = this.getTokenExpiresIn(token)
     return expiresIn !== null && expiresIn <= 0
   }

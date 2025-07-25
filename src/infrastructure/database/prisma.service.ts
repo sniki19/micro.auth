@@ -21,8 +21,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     try {
       await this.$connect()
       this.logger.info('✅ Database connection established successfully.')
-    } catch (error) {
-      this.logger.error('❌ Failed to establish database connection.', error)
+    } catch (error: unknown) {
+      this.logger.error('❌ Failed to establish database connection.', { error })
       throw error
     }
   }
@@ -33,8 +33,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     try {
       await this.$disconnect()
       this.logger.info('🟢 Database connection closed successfully.')
-    } catch (error) {
-      this.logger.error('⚠️ Error occurred while closing the database connection.', error)
+    } catch (error: unknown) {
+      this.logger.error('⚠️ Error occurred while closing the database connection.', { error })
       throw error
     }
   }

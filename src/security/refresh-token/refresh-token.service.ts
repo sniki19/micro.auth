@@ -27,6 +27,7 @@ export class RefreshTokenService {
     fingerprintOptions?: FingerprintOptions,
     transactionOptions?: TransactionOptions
   ) {
+    this.logger.info('⚡ Creating refresh token', { userId })
     const expiresAt = this.jwtTokenService.getTokenExpirationDate(token)
 
     const fingerprint = fingerprintOptions
@@ -35,17 +36,27 @@ export class RefreshTokenService {
 
     const dbClient = transactionOptions?.prismaTx || this.prisma
 
-    return dbClient.refreshToken.create({
-      data: {
-        userId,
-        token,
-        expiresAt,
-        fingerprint
-      }
-    })
+    try {
+      const refreshToken = await dbClient.refreshToken.create({
+        data: {
+          userId,
+          token,
+          expiresAt,
+          fingerprint
+        }
+      })
+
+      this.logger.success('Refresh token created successfully', { userId, tokenId: refreshToken.id })
+      return refreshToken
+    } catch (error: unknown) {
+      this.logger.error('Failed to create refresh token', { userId, error })
+      throw new InternalServerErrorException('Failed to create refresh token')
+    }
   }
 
   async getToken(userId: string, fingerprintOptions?: FingerprintOptions) {
+    this.logger.info('Getting refresh token for user', { userId })
+
     const fingerprint = fingerprintOptions
       ? this.fingerprintService.generateHMAC(fingerprintOptions)
       : undefined
@@ -59,22 +70,35 @@ export class RefreshTokenService {
       }
     })
 
+    if (!token) {
+      this.logger.warn('Refresh token not found or invalid', { userId })
+    }
     return token?.token
   }
 
   async validateToken(token: string): Promise<boolean> {
-    const { sub: userId } = this.jwtTokenService.verifyRefreshToken(token)
+    this.logger.debug('🛡️ Validating refresh token')
 
-    const storedToken = await this.prisma.refreshToken.findFirst({
-      where: {
-        userId,
-        token,
-        isRevoked: false,
-        expiresAt: { gt: new Date() }
-      }
-    })
+    try {
+      const { sub: userId } = this.jwtTokenService.verifyRefreshToken(token)
 
-    return !!storedToken
+      const storedToken = await this.prisma.refreshToken.findFirst({
+        where: {
+          userId,
+          token,
+          isRevoked: false,
+          expiresAt: { gt: new Date() }
+        }
+      })
+
+      const isValid = !!storedToken
+      this.logger.info('Refresh token validation result', { userId, isValid })
+
+      return isValid
+    } catch (error: unknown) {
+      this.logger.warn('Refresh token validation failed', { error })
+      return false
+    }
   }
 
   async rotateToken(
@@ -84,6 +108,7 @@ export class RefreshTokenService {
     fingerprintOptions?: FingerprintOptions,
     transactionOptions?: TransactionOptions
   ) {
+    this.logger.info('🔄 Rotating refresh token', { userId })
     const expiresAt = this.jwtTokenService.getTokenExpirationDate(newToken)
 
     const fingerprint = fingerprintOptions
@@ -92,58 +117,56 @@ export class RefreshTokenService {
 
     const dbClient = (transactionOptions?.prismaTx || this.prisma) as Prisma.TransactionClient | PrismaService
 
-    try {
-      if (dbClient instanceof PrismaService && '$transaction' in dbClient) {
-        await dbClient.$transaction([
-          dbClient.refreshToken.updateMany({
-            where: {
-              userId,
-              token: oldToken
-            },
-            data: {
-              isRevoked: true
-            }
-          }),
-          dbClient.refreshToken.create({
-            data: {
-              userId,
-              token: newToken,
-              expiresAt,
-              fingerprint
-            }
-          })
-        ])
-      } else {
-        await Promise.all([
-          dbClient.refreshToken.updateMany({
-            where: {
-              userId,
-              token: oldToken
-            },
-            data: {
-              isRevoked: true
-            }
-          }),
-          dbClient.refreshToken.create({
-            data: {
-              userId,
-              token: newToken,
-              expiresAt,
-              fingerprint
-            }
-          })
-        ])
-      }
-    } catch (error: unknown) {
-      this.logger.error('Failed to rotate tokens', { error })
-      throw new InternalServerErrorException('Refresh token failed')
+    if (dbClient instanceof PrismaService && '$transaction' in dbClient) {
+      await dbClient.$transaction([
+        dbClient.refreshToken.updateMany({
+          where: {
+            userId,
+            token: oldToken
+          },
+          data: {
+            isRevoked: true
+          }
+        }),
+        dbClient.refreshToken.create({
+          data: {
+            userId,
+            token: newToken,
+            expiresAt,
+            fingerprint
+          }
+        })
+      ])
+    } else {
+      await Promise.all([
+        dbClient.refreshToken.updateMany({
+          where: {
+            userId,
+            token: oldToken
+          },
+          data: {
+            isRevoked: true
+          }
+        }),
+        dbClient.refreshToken.create({
+          data: {
+            userId,
+            token: newToken,
+            expiresAt,
+            fingerprint
+          }
+        })
+      ])
     }
+
+    this.logger.success('Token rotated successfully', { userId })
   }
 
   async invalidateAllTokens(userId: string, transactionOptions?: TransactionOptions): Promise<void> {
+    this.logger.info('Invalidating all refresh tokens for user', { userId })
     const dbClient = transactionOptions?.prismaTx || this.prisma
 
-    await dbClient.refreshToken.updateMany({
+    const result = await dbClient.refreshToken.updateMany({
       where: {
         userId,
         isRevoked: false
@@ -153,5 +176,6 @@ export class RefreshTokenService {
         revokedAt: new Date()
       }
     })
+    this.logger.info('All refresh tokens invalidated', { userId, count: result.count })
   }
 }

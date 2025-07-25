@@ -27,7 +27,7 @@ export class PasswordService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    this.logger.debug('Starting password hashing')
+    this.logger.info('Starting password hashing')
     const hash = await argon2.hash(password, this.ARGON2_OPTIONS)
 
     this.logger.success('Password hashed successfully')
@@ -35,7 +35,7 @@ export class PasswordService {
   }
 
   async comparePassword(password: string, hash: string): Promise<boolean> {
-    this.logger.debug('Starting password comparison')
+    this.logger.info('Starting password comparison')
     const isMatch = await argon2.verify(hash, password)
 
     if (isMatch) {
@@ -47,19 +47,19 @@ export class PasswordService {
   }
 
   // generateResetToken(): string {
-  //   this.logger.debug('Generating password reset token')
+  //   this.logger.info('Generating password reset token')
   //   const token = randomBytes(32).toString('hex')
-  //   this.logger.debug('Password reset token generated')
+  //   this.logger.success('Password reset token generated')
   //   return token
   // }
 
   // generateResetTokenWithExpiry(expiresInHours: number): { token: string; expiresAt: Date } {
-  //   this.logger.debug('Generating password reset token with expiry', { expiresInHours })
+  //   this.logger.info('Generating password reset token with expiry', { expiresInHours })
   //   const result = {
   //     token: this.generateResetToken(),
   //     expiresAt: new Date(Date.now() + expiresInHours * 3600 * 1000)
   //   }
-  //   this.logger.debug('Password reset token with expiry generated', { expiresAt: result.expiresAt })
+  //   this.logger.success('Password reset token with expiry generated', { expiresAt: result.expiresAt })
   //   return result
   // }
 }

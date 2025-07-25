@@ -63,7 +63,7 @@ export class CustomLogger {
   }
 
   success(message: string, ...args: unknown[]): void {
-    this.logWithLevel('info', `✅ ${message}`, ...args)
+    this.logWithLevel('info', `🗸 ${message}`, ...args)
   }
 
   debug(message: string, ...args: unknown[]): void {
