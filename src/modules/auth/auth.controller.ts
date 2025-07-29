@@ -115,6 +115,7 @@ export class AuthController {
     description: 'Invalid or expired refresh token'
   })
   @Post('refresh')
+  @Authorization()
   @HttpCode(HttpStatus.OK)
   async refresh(
     @Authorized('userId') userId: string,

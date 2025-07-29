@@ -50,7 +50,7 @@ export class AuthService {
     try {
       const hashedPassword = await this.passwordService.hashPassword(password)
 
-      return await this.prisma.$transaction(async (prismaTx) => {
+      const user = await this.prisma.$transaction(async (prismaTx) => {
         const { userId } = await this.userService.createUser(
           {
             email,
@@ -74,6 +74,9 @@ export class AuthService {
 
         return { userId }
       })
+
+      this.logger.success('User created successfully', user)
+      return user
     } catch (error: unknown) {
       this.logger.error('Registration transaction failed', { error, email, phone })
       throw new InternalServerErrorException('Registration failed')
@@ -104,22 +107,19 @@ export class AuthService {
             fingerprintOptions,
             { prismaTx }
           ),
-          this.outboxService.addEvent(
-            {
-              eventType: 'UserLoggedIn',
-              eventData: {
-                userId
-              }
-            },
-            { prismaTx }
-          )
+          this.outboxService.addEvent({
+            eventType: 'UserLoggedIn',
+            eventData: {
+              userId
+            }
+          }, { prismaTx })
         ])
       })
 
       this.logger.success('Login successful', { userId })
       return { accessToken }
     } catch (error: unknown) {
-      this.logger.error('Login transaction failed', { error, userId, fingerprintOptions })
+      this.logger.error('Login failed', { error, userId, fingerprintOptions })
       throw new InternalServerErrorException('Login failed due to a database error')
     }
   }
@@ -153,30 +153,67 @@ export class AuthService {
 
       this.logger.success('Logout successful', { userId })
     } catch (error: unknown) {
-      this.logger.error('Logout transaction failed', { userId, error })
+      this.logger.error('Logout failed', { userId, error })
       throw new InternalServerErrorException('Logout failed due to a database error')
     }
   }
 
   async refresh(
     userId: string,
-    accessToken: string,
+    oldAccessToken: string,
     fingerprintOptions?: FingerprintOptions
   ): Promise<AuthResponse> {
     this.logger.info('🔄 Token refresh requested', { userId })
 
-    const refreshToken = await this.refreshTokenService.getToken(userId, fingerprintOptions)
-    if (!refreshToken) {
+    const isValidSession = await this.sessionService.validateSession(userId, oldAccessToken)
+    if (!isValidSession) {
+      this.logger.warn('Invalid session', { userId })
+      throw new UnauthorizedException('Invalid session')
+    }
+
+    const storedRefreshToken = await this.refreshTokenService.findTokenRecord(userId, fingerprintOptions)
+    if (!storedRefreshToken) {
       this.logger.warn('Invalid refresh token attempt', { userId })
       throw new UnauthorizedException('Invalid refresh token')
     }
 
-    const tokens = this.jwtTokenService.generateTokens(refreshToken)
+    const { accessToken, refreshToken } = this.jwtTokenService.generateTokens(userId)
 
-    await this.refreshTokenService.rotateToken(userId, refreshToken, tokens.refreshToken, fingerprintOptions)
-    this.logger.success('Token refreshed successfully', { userId })
+    try {
+      await this.prisma.$transaction(async (prismaTx) => {
+        await Promise.all([
+          this.refreshTokenService.rotateToken(
+            userId,
+            storedRefreshToken.token,
+            refreshToken,
+            fingerprintOptions,
+            { prismaTx }
+          ),
 
-    return { accessToken }
+          this.sessionService.updateSessionToken(
+            userId,
+            oldAccessToken,
+            accessToken,
+            { prismaTx }
+          ),
+
+          this.outboxService.addEvent({
+            eventType: 'TokensRefreshed',
+            eventData: {
+              userId,
+              oldAccessToken: oldAccessToken.slice(-8),
+              newAccessToken: accessToken.slice(-8)
+            }
+          }, { prismaTx })
+        ])
+      })
+
+      this.logger.success('Token refreshed successfully', { userId })
+      return { accessToken }
+    } catch (error: unknown) {
+      this.logger.error('Refresh failed', { userId, error })
+      throw new InternalServerErrorException('Refresh failed due to a database error')
+    }
   }
 
   private async validateUser(loginDto: LoginRequest, ipAddress?: string): Promise<UserAuthCredentials> {

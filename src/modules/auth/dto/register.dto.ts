@@ -6,42 +6,42 @@ import { IsEmailOrPhone, IsMatchingPassword } from 'src/common/decorators'
 
 export class RegisterRequest {
   @ApiProperty({
-    description: 'Электронный адрес',
+    description: 'Email address',
     example: 'user@site.com'
   })
   @Transform((params: TransformFnParams) => {
     return typeof params.value === 'string' ? params.value.toLowerCase().trim() : ''
   })
   @IsOptional()
-  @IsEmail({}, { message: 'Некорректный email' })
+  @IsEmail({}, { message: 'Invalid email' })
   email?: string
 
   @ApiProperty({
-    description: 'Телефон',
+    description: 'Phone number',
     example: '+375291234567'
   })
   @IsOptional()
-  @IsPhoneNumber(undefined, { message: 'Телефон должен быть в формате +123456789' })
-  @Matches(/^\+?\d{10,15}$/, {
-    message: 'Телефон должен содержать от 10 до 15 цифр, можно с + в начале'
+  @IsPhoneNumber(undefined, { message: 'Phone number must be in format +123456789' })
+  @Matches(/^\+?\d{10,12}$/, {
+    message: 'Phone number must contain 10-12 digits, may start with +'
   })
   phone?: string
 
   @ApiProperty({
-    description: 'Пароль',
+    description: 'Password',
     example: '123qwe!@#QWE'
   })
   @IsEmailOrPhone()
-  @IsNotEmpty({ message: 'Пароль обязателен для заполнения' })
-  @IsString({ message: 'Пароль должен быть строкой' })
-  @Length(8, 32, { message: 'Пароль должен быть от 8 до 32 символов' })
+  @IsNotEmpty({ message: 'Password is required' })
+  @IsString({ message: 'Password must be a string' })
+  @Length(8, 32, { message: 'Password must be 8-32 characters long' })
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'Пароль слишком слабый. Используйте буквы (A-Z, a-z), цифры и спецсимволы'
+    message: 'Password is too weak. Use letters (A-Z, a-z), numbers and special characters'
   })
   password: string
 
   @ApiProperty({
-    description: 'Подтверждение пароля',
+    description: 'Password confirmation',
     example: '123qwe!@#QWE'
   })
   @IsNotEmpty()

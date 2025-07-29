@@ -63,6 +63,55 @@ export class SessionService {
     }
   }
 
+  async updateSessionToken(
+    userId: string,
+    oldToken: string,
+    newToken: string,
+    transactionOptions?: TransactionOptions
+  ): Promise<void> {
+    this.logger.info('🔄 Update user session', { userId })
+
+    const dbClient = transactionOptions?.prismaTx || this.prisma
+    const expiresAt = this.tokenService.getTokenExpirationDate(newToken)
+
+    try {
+      await dbClient.userSession.updateMany({
+        where: {
+          userId,
+          sessionToken: oldToken
+        },
+        data: {
+          sessionToken: newToken,
+          expiresAt
+        }
+      })
+
+      this.logger.success(`Session updated for user ${userId}`)
+    } catch (error: unknown) {
+      this.logger.error('Failed to update user session', { userId, error })
+      throw new InternalServerErrorException('Failed to update user session')
+    }
+  }
+
+  async validateSession(
+    userId: string,
+    sessionToken: string,
+    transactionOptions?: TransactionOptions
+  ): Promise<boolean> {
+    this.logger.info('🛡️ Validating user session', { userId })
+
+    const dbClient = transactionOptions?.prismaTx || this.prisma
+    const session = await dbClient.userSession.findFirst({
+      where: {
+        userId,
+        sessionToken,
+        expiresAt: { gt: new Date() }
+      }
+    })
+
+    return !!session
+  }
+
   async terminateSession(
     userId: string,
     sessionToken: string,

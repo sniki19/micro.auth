@@ -5,7 +5,8 @@ export const OutboxEventType = {
   PASSWORD_CHANGED: 'PasswordChanged',
   ACCOUNT_BLOCKED: 'AccountBlocked',
   EMAIL_VERIFIED: 'EmailVerified',
-  PROFILE_UPDATED: 'ProfileUpdated'
+  PROFILE_UPDATED: 'ProfileUpdated',
+  REFRESH_TOKENS: 'TokensRefreshed'
 } as const
 
 export type OutboxEventType = typeof OutboxEventType[keyof typeof OutboxEventType]

@@ -54,7 +54,7 @@ export class RefreshTokenService {
     }
   }
 
-  async getToken(userId: string, fingerprintOptions?: FingerprintOptions) {
+  async findTokenRecord(userId: string, fingerprintOptions?: FingerprintOptions) {
     this.logger.info('Getting refresh token for user', { userId })
 
     const fingerprint = fingerprintOptions
@@ -73,7 +73,7 @@ export class RefreshTokenService {
     if (!token) {
       this.logger.warn('Refresh token not found or invalid', { userId })
     }
-    return token?.token
+    return token
   }
 
   async validateToken(token: string): Promise<boolean> {
@@ -109,8 +109,8 @@ export class RefreshTokenService {
     transactionOptions?: TransactionOptions
   ) {
     this.logger.info('🔄 Rotating refresh token', { userId })
-    const expiresAt = this.jwtTokenService.getTokenExpirationDate(newToken)
 
+    const expiresAt = this.jwtTokenService.getTokenExpirationDate(newToken)
     const fingerprint = fingerprintOptions
       ? this.fingerprintService.generateHMAC(fingerprintOptions)
       : undefined
@@ -122,10 +122,13 @@ export class RefreshTokenService {
         dbClient.refreshToken.updateMany({
           where: {
             userId,
-            token: oldToken
+            token: oldToken,
+            fingerprint,
+            isRevoked: false
           },
           data: {
-            isRevoked: true
+            isRevoked: true,
+            revokedAt: new Date()
           }
         }),
         dbClient.refreshToken.create({
@@ -142,10 +145,13 @@ export class RefreshTokenService {
         dbClient.refreshToken.updateMany({
           where: {
             userId,
-            token: oldToken
+            token: oldToken,
+            fingerprint,
+            isRevoked: false
           },
           data: {
-            isRevoked: true
+            isRevoked: true,
+            revokedAt: new Date()
           }
         }),
         dbClient.refreshToken.create({

@@ -8,15 +8,15 @@ export class LoginRequest {
     return typeof params.value === 'string' ? params.value.toLowerCase().trim() : ''
   })
   @IsOptional()
-  @IsEmail({}, { message: 'Некорректный email' })
+  @IsEmail({}, { message: 'Invalid email' })
   email?: string
 
   @IsOptional()
-  @IsPhoneNumber(undefined, { message: 'Телефон должен быть в формате +123456789' })
+  @IsPhoneNumber(undefined, { message: 'Phone number must be in format +123456789' })
   phone?: string
 
   @IsEmailOrPhone()
-  @IsNotEmpty({ message: 'Пароль не должен быть пустым' })
-  @IsString({ message: 'Пароль должен быть строкой' })
+  @IsNotEmpty({ message: 'Password cannot be empty' })
+  @IsString({ message: 'Password must be a string' })
   password: string
 }
