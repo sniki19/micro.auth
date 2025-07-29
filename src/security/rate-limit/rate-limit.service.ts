@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common'
 import { PrismaService } from 'src/infrastructure/database/prisma.service'
 import { CustomLogger, CustomLoggerWithContext } from 'src/infrastructure/logger/logger.service'
+import { UserSecuritySettingsService } from '../user-security-settings/user-security-settings.service'
 import { ActionType, ServiceName } from './constants'
 
 
@@ -10,7 +11,8 @@ export class RateLimitService {
 
   constructor(
     private readonly customLogger: CustomLogger,
-    private prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly userSecuritySettingsService: UserSecuritySettingsService
   ) {
     this.logger = this.customLogger.withContext(RateLimitService.name)
   }
@@ -25,8 +27,6 @@ export class RateLimitService {
     if (!rateLimit) {
       this.logger.error(`Rate limit configuration not found for ${ServiceName.AUTH_LOGIN}`)
       throw new InternalServerErrorException('Service is not configured')
-      // Default rate limit if not configured
-      // return void 0
     }
 
     const now = new Date()
@@ -46,7 +46,7 @@ export class RateLimitService {
     })
 
     if (!attempt) {
-      this.logger.debug('Creating new auth attempt record', { userId, ipAddress })
+      this.logger.info('Creating new auth attempt record', { userId, ipAddress })
       return this.prisma.userAuthAttempt.create({
         data: {
           rateLimitId: rateLimit.id,
@@ -61,11 +61,11 @@ export class RateLimitService {
     } else {
       const isBlocked = attempt.attempts + 1 > rateLimit.maxAttempts
       const blockExpiresAt = isBlocked
-        ? new Date(now.getTime() + 30 * 60 * 1000) // 30 minutes block
+        ? new Date(now.getTime() + rateLimit.blockDurationSeconds * 1000)
         : null
-      const blockReason = 'Too many failed login attempts'
+      const blockReason = isBlocked ? 'Too many failed login attempts' : null
 
-      this.logger.debug('Updating existing auth attempt', {
+      this.logger.info('Updating existing auth attempt', {
         userId,
         ipAddress,
         attempts: attempt.attempts + 1,
@@ -84,36 +84,10 @@ export class RateLimitService {
       })
 
       if (isBlocked) {
-        this.logger.warn('🔒 User blocked due to too many failed attempts', { userId, blockExpiresAt })
-        await this.prisma.userSecuritySettings.update({
-          where: { userId },
-          data: {
-            accountBlocked: true,
-            blockedUntil: blockExpiresAt,
-            blockReason: 'Too many failed login attempts'
-          }
-        })
+        await this.userSecuritySettingsService.blockUser(userId, blockExpiresAt!, blockReason!)
       }
 
       return updatedAttempt
     }
   }
-
-  // async isLoginBlocked(userId?: string, ipAddress?: string) {
-  //   if (!userId && !ipAddress) return false
-
-  //   const blockedAttempt = await this.prisma.userAuthAttempt.findFirst({
-  //     where: {
-  //       actionType: 'LOGIN',
-  //       isBlocked: true,
-  //       blockExpiresAt: { gt: new Date() },
-  //       OR: [
-  //         { userId },
-  //         { ipAddress }
-  //       ]
-  //     }
-  //   })
-
-  //   return !!blockedAttempt
-  // }
 }

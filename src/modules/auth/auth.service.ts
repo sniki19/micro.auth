@@ -16,6 +16,7 @@ import { PasswordService } from 'src/security/password/password.service'
 import { RateLimitService } from 'src/security/rate-limit/rate-limit.service'
 import { RefreshTokenService } from 'src/security/refresh-token/refresh-token.service'
 import { SessionService } from 'src/security/session/session.service'
+import { UserSecuritySettingsService } from 'src/security/user-security-settings/user-security-settings.service'
 import { AuthResponse, LoginRequest, RegisterRequest } from './dto'
 
 
@@ -32,6 +33,7 @@ export class AuthService {
     private readonly rateLimitService: RateLimitService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly sessionService: SessionService,
+    private readonly userSecuritySettingsService: UserSecuritySettingsService,
     private readonly userService: UserService
   ) {
     this.logger = this.customLogger.withContext(AuthService.name)
@@ -87,7 +89,7 @@ export class AuthService {
     const { email, phone } = loginDto
     this.logger.info('🔑 Starting login', { email, phone }, fingerprintOptions)
 
-    const { userId } = await this.validateUser(loginDto)
+    const { userId } = await this.validateUser(loginDto, fingerprintOptions)
     this.logger.success('User validated successfully', { userId })
 
     const { accessToken, refreshToken } = this.jwtTokenService.generateTokens(userId)
@@ -216,8 +218,12 @@ export class AuthService {
     }
   }
 
-  private async validateUser(loginDto: LoginRequest, ipAddress?: string): Promise<UserAuthCredentials> {
+  private async validateUser(
+    loginDto: LoginRequest,
+    fingerprintOptions?: FingerprintOptions
+  ): Promise<UserAuthCredentials> {
     const { email, phone, password } = loginDto
+    const ipAddress = fingerprintOptions?.ipAddress
     this.logger.info('Validating user credentials', { email, phone })
 
     const user = await this.userService.findUser(email, phone)
@@ -225,9 +231,10 @@ export class AuthService {
       this.logger.warn('User not found', { email, phone, ipAddress })
       throw new NotFoundException('User not found')
     }
+    const { userId } = user
 
     if (!user.isActive) {
-      this.logger.warn('Attempt to login to deactivated account', { userId: user.userId })
+      this.logger.warn('Attempt to login to deactivated account', { userId })
       throw new UnauthorizedException('Account is deactivated')
     }
 
@@ -236,41 +243,34 @@ export class AuthService {
 
       if (user.userSecuritySettings.blockedUntil && user.userSecuritySettings.blockedUntil > now) {
         this.logger.warn('🔒 Blocked login attempt', {
-          userId: user.userId,
+          userId,
           blockedUntil: user.userSecuritySettings.blockedUntil,
           blockReason: user.userSecuritySettings.blockReason
         })
         throw new UnauthorizedException('Account is temporarily blocked')
       } else {
-        this.logger.info('🔓 Unblocking user as block period has passed', { userId: user.userId })
-        await this.prisma.userSecuritySettings.update({
-          where: { userId: user.userId },
-          data: {
-            accountBlocked: false,
-            blockedUntil: null,
-            blockReason: null
-          }
-        })
+        this.logger.debug('Attempt to unblock user', { userId })
+        await this.userSecuritySettingsService.unblockUser(userId)
       }
     }
 
     const isPasswordValid = await this.passwordService.comparePassword(password, user.password)
     if (!isPasswordValid) {
-      this.logger.warn('Invalid password attempt', { userId: user.userId, ipAddress })
+      this.logger.warn('Invalid password attempt', { userId, ipAddress })
       await this.rateLimitService.trackFailedLoginAttempt(user.userId, ipAddress)
       throw new UnauthorizedException('Invalid credentials')
     }
 
     // Reset failed attempts on successful login
     if (user.userSecuritySettings?.failedLoginAttempts ?? 0 > 0) {
-      this.logger.info('Resetting failed login attempts after successful login', { userId: user.userId })
+      this.logger.info('Resetting failed login attempts after successful login', { userId })
       await this.prisma.userSecuritySettings.update({
-        where: { userId: user.userId },
+        where: { userId },
         data: { failedLoginAttempts: 0 }
       })
     }
 
-    this.logger.success('User validation successful', { userId: user.userId })
+    this.logger.success('User validation successful', { userId })
     return user
   }
 }

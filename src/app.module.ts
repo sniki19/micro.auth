@@ -11,6 +11,7 @@ import { UserModule } from './modules/user/user.module'
 import { FingerprintModule } from './security/fingerprint/fingerprint.module'
 import { JwtTokenModule } from './security/jwt-token/jwt-token.module'
 import { SessionModule } from './security/session/session.module'
+import { UserSecuritySettingsModule } from './security/user-security-settings/user-security-settings.module'
 
 
 @Module({
@@ -24,7 +25,8 @@ import { SessionModule } from './security/session/session.module'
     UserModule,
     FingerprintModule,
     JwtTokenModule,
-    SessionModule
+    SessionModule,
+    UserSecuritySettingsModule
   ],
   controllers: [AppController],
   providers: [AppService]
