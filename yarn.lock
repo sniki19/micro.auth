@@ -1129,15 +1129,15 @@
     "@types/jsonwebtoken" "9.0.7"
     jsonwebtoken "9.0.2"
 
-"@nestjs/mapped-types@*", "@nestjs/mapped-types@2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-2.1.0.tgz#b9b536b7c3571567aa1d0223db8baa1a51505a19"
-  integrity sha512-W+n+rM69XsFdwORF11UqJahn4J3xi4g/ZEOlJNL6KoW5ygWSmBB2p0S2BZ4FQeS/NDH72e6xIcu35SfJnE8bXw==
-
 "@nestjs/mapped-types@2.0.5":
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-2.0.5.tgz#485d6b44e19779c98d04e52bd1d2bcc7001df0ea"
   integrity sha512-bSJv4pd6EY99NX9CjBIyn4TVDoSit82DUZlL4I3bqNfy5Gt+gXTa86i3I/i0iIV9P4hntcGM5GyO+FhZAhxtyg==
+
+"@nestjs/mapped-types@2.1.0", "@nestjs/mapped-types@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@nestjs/mapped-types/-/mapped-types-2.1.0.tgz#b9b536b7c3571567aa1d0223db8baa1a51505a19"
+  integrity sha512-W+n+rM69XsFdwORF11UqJahn4J3xi4g/ZEOlJNL6KoW5ygWSmBB2p0S2BZ4FQeS/NDH72e6xIcu35SfJnE8bXw==
 
 "@nestjs/passport@^11.0.5":
   version "11.0.5"
@@ -2176,12 +2176,12 @@
   dependencies:
     "@types/express" "*"
 
-"@types/pino-http@^5.8.4":
-  version "5.8.4"
-  resolved "https://registry.yarnpkg.com/@types/pino-http/-/pino-http-5.8.4.tgz#c775d527fccdde3c055f9c3ac55c0975284c70f0"
-  integrity sha512-UTYBQ2acmJ2eK0w58vVtgZ9RAicFFndfrnWC1w5cBTf8zwn/HEy8O+H7psc03UZgTzHmlcuX8VkPRnRDEj+FUQ==
+"@types/pino-http@^6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@types/pino-http/-/pino-http-6.1.0.tgz#3bdda94b4cda0481c907fb9f2bb7502c8ff538d4"
+  integrity sha512-rjPOSk2yI0714Pi8LdjIhDynXWqOvswmjRiTHj/1TOh1+0R26aKJ8vAVZRc4Ky5dQ5M5Bly1vrV/Klew6lThkA==
   dependencies:
-    "@types/pino" "6.3"
+    pino-http "*"
 
 "@types/pino-multi-stream@^5.1.6":
   version "5.1.6"
@@ -6398,7 +6398,7 @@ pino-abstract-transport@v0.5.0:
     duplexify "^4.1.2"
     split2 "^4.0.0"
 
-pino-http@^10.5.0:
+pino-http@*, pino-http@^10.5.0:
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/pino-http/-/pino-http-10.5.0.tgz#6a4fd8df93a181fc89f7f89979b8a2146aad29f2"
   integrity sha512-hD91XjgaKkSsdn8P7LaebrNzhGTdB086W3pyPihX0EzGPjq5uBJBXo4N5guqNaK6mUjg9aubMF7wDViYek9dRA==
