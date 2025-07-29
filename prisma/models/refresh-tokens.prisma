@@ -1,13 +1,17 @@
 model RefreshToken {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  userId      String   @map("user_id")
-  token       String
-  expiresAt   DateTime @map("expires_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  userId      String    @map("user_id") @db.Uuid
+  token       String    @unique
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
   fingerprint String?
+  isRevoked   Boolean   @default(false) @map("is_revoked")
+  revokedAt   DateTime? @map("revoked_at")
 
-  user AuthCredentials @relation(fields: [userId], references: [userId], map: "refresh_tokens_auth_credentials_fkey")
+  user UserAuthCredentials @relation(fields: [userId], references: [userId], map: "refresh_tokens_auth_credentials_fkey")
 
+  @@index([userId, fingerprint], name: "refresh_tokens_user_id_fingerprint_idx")
+  @@index([token], name: "refresh_tokens_token_idx")
   @@map("refresh_tokens")
 }

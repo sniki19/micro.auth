@@ -1,5 +1,5 @@
 model RateLimit {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
   serviceName        String @map("service_name") @db.VarChar(256)
   maxAttempts        Int    @map("max_attempts")
@@ -10,5 +10,6 @@ model RateLimit {
 
   userAuthAttempt UserAuthAttempt[]
 
+  @@index([serviceName], name: "rate_limits_service_name_idx")
   @@map("rate_limits")
 }

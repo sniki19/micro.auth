@@ -1,16 +1,17 @@
 model UserSession {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  userId       String   @map("user_id")
-  sessionToken String   @map("session_token")
+  userId       String   @map("user_id") @db.Uuid
+  sessionToken String   @unique @map("session_token")
   ipAddress    String?  @map("ip_address")
   userAgent    String?  @map("user_agent")
+  fingerprint  String?
   createdAt    DateTime @default(now()) @map("created_at")
   expiresAt    DateTime @map("expires_at")
   lastActivity DateTime @default(now()) @map("last_activity")
   isActive     Boolean  @default(true) @map("is_active")
 
-  user AuthCredentials @relation(fields: [userId], references: [userId], map: "user_sessions_auth_credentials_fkey")
+  user UserAuthCredentials @relation(fields: [userId], references: [userId], map: "user_sessions_auth_credentials_fkey", onDelete: Cascade)
 
   @@map("user_sessions")
 }

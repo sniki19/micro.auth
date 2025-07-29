@@ -1,10 +1,11 @@
 model Outbox {
-  id String @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  eventId   String @unique @default(cuid()) @map("event_id")
-  eventType String @map("event_type")
-  eventData Json   @map("event_data")
-  status    String @default("PENDING")
+  eventId   String  @unique @default(cuid()) @map("event_id")
+  eventType String  @map("event_type")
+  eventData Json    @map("event_data")
+  status    Status  @default(PENDING)
+  error     String?
 
   createdAt   DateTime  @default(now()) @map("created_at")
   processedAt DateTime? @map("processed_at")
