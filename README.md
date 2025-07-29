@@ -1,13 +1,15 @@
 <p align="center">
-  <img src="./src/assets/logo.png" alt="Logo" width="128" height="128" />
+  <img src="./src/static/assets/logo.png" alt="Logo" width="128" height="128" />
 </p>
 
 
+<h1 align="center">micro.auth</h1>
+
 ## Description
 
-"micro.auth" is a microservice for authorization, built on [Nest](https://github.com/nestjs/nest)
+"micro.auth" is an authorization microservice built on [NestJS](https://github.com/nestjs/nest) framework
 
 
 ## License
 
-micro.auth is [MIT licensed](https://github.com/sniki19/micro.auth/blob/master/LICENSE).
+micro.auth is [MIT licensed](LICENSE).
