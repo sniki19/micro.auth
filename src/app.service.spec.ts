@@ -1,24 +1,38 @@
-import { LoggerMock } from '@test/mock/logger.mock'
-import { createTestModule } from '@test/test-utils'
+import { CustomLogger } from '@logger/logger.service'
+import { Test, TestingModule } from '@nestjs/testing'
+import { createLoggerMock } from '@test/mock/logger.mock'
 import { AppService } from './app.service'
 
 
 describe('AppService', () => {
   let service: AppService
-  let logger: LoggerMock
+  let logger: jest.Mocked<CustomLogger>
 
   beforeEach(async () => {
-    const { module, loggerMock } = await createTestModule([AppService])
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AppService,
+        {
+          provide: CustomLogger,
+          useValue: createLoggerMock()
+        }
+      ]
+    }).compile()
+
     service = module.get<AppService>(AppService)
-    logger = loggerMock
+    logger = module.get(CustomLogger)
   })
 
-  describe('getHello', () => {
+  describe('getHello()', () => {
     it('should return "Hello Micro.auth!" and log message', () => {
       const result = service.getHello()
 
       expect(result).toBe('Hello Micro.auth!')
-      expect(logger.withContext).toHaveBeenCalledWith('AppService')
+    })
+
+    it('should log the operation', () => {
+      service.getHello()
+      expect(logger.withContext).toHaveBeenCalledWith(AppService.name)
       expect(logger.info).toHaveBeenCalledWith('Hello Micro.auth!')
     })
   })

@@ -1,37 +1,22 @@
-export type LoggerMock = {
-  withContext: jest.Mock<{
-    log: jest.Mock
-    info: jest.Mock
-    success: jest.Mock
-    debug: jest.Mock
-    warn: jest.Mock
-    error: jest.Mock
-  }, [context: string]>
-  log: jest.Mock
-  info: jest.Mock
-  success: jest.Mock
-  debug: jest.Mock
-  warn: jest.Mock
-  error: jest.Mock
-}
+import { CustomLogger } from '@logger/logger.service'
 
-export const createLoggerMock = (): LoggerMock => {
+
+export const createLoggerMock = (): jest.Mocked<CustomLogger> => {
   const contextLogger = {
     log: jest.fn(),
     info: jest.fn(),
     success: jest.fn(),
     debug: jest.fn(),
     warn: jest.fn(),
-    error: jest.fn(),
+    error: jest.fn()
   }
 
   const mockLogger = {
-    withContext: jest.fn((context: string) => {
-      console.log(`Logger context set to: ${context}`)
+    withContext: jest.fn((_context: string) => {
       return contextLogger
     }),
     ...contextLogger
-  }
+  } as unknown as jest.Mocked<CustomLogger>
 
   return mockLogger
 }

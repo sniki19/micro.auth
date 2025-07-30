@@ -21,6 +21,7 @@
     "paths": {
       "@test/*": ["./test/*"],
       "@logger/*": ["./src/infrastructure/logger/*"],
+      "@database/*": ["./src/infrastructure/database/*"],
       "@app/*": ["./src/*"]
     }
   }

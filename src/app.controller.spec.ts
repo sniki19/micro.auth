@@ -1,33 +1,36 @@
-import { createTestModule } from '@test/test-utils'
+import { Test, TestingModule } from '@nestjs/testing'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 
 
 describe('AppController', () => {
   let controller: AppController
-  let appService: { getHello: jest.Mock<string, []> }
+  let service: jest.Mocked<AppService>
 
-  beforeEach(async () => {
-    const { module } = await createTestModule([
-      AppController,
-      {
-        provide: AppService,
-        useValue: {
-          getHello: jest.fn().mockReturnValue('Hello Micro.auth!')
-        }
-      }
-    ])
-
-    controller = module.get<AppController>(AppController)
-    appService = module.get(AppService)
+  const createMockService = () => ({
+    getHello: jest.fn().mockReturnValue('Hello Micro.auth!')
   })
 
-  describe('getHello', () => {
-    it('should return "Hello Micro.auth!"', () => {
-      const result = controller.getHello()
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [AppController],
+      providers: [
+        {
+          provide: AppService,
+          useValue: createMockService()
+        }
+      ]
+    }).compile()
 
+    controller = module.get<AppController>(AppController)
+    service = module.get(AppService)
+  })
+
+  describe('getHello()', () => {
+    it('should return hello message', () => {
+      const result = controller.getHello()
       expect(result).toBe('Hello Micro.auth!')
-      expect(appService.getHello).toHaveBeenCalled()
+      expect(service.getHello).toHaveBeenCalled()
     })
   })
 })

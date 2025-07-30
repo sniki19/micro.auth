@@ -112,6 +112,7 @@
     "moduleNameMapper": {
       "^@test/(.*)$": "<rootDir>/../test/$1",
       "^@logger/(.*)$": "<rootDir>/infrastructure/logger/$1",
+      "^@database/(.*)$": "<rootDir>/infrastructure/database/$1",
       "^@app/(.*)$": "<rootDir>/$1"
     }
   },
