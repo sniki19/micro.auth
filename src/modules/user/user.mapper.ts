@@ -3,7 +3,7 @@ import { plainToInstance } from 'class-transformer'
 import { UserDto } from './dto'
 
 
-export const mapToUserDto = (entity: UserAuthCredentials) => {
+export const mapToUserDto = (entity: UserAuthCredentials): UserDto => {
   return plainToInstance(UserDto, entity, {
     excludeExtraneousValues: true,
     enableImplicitConversion: true

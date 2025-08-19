@@ -8,6 +8,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER auth_credentials_check
-BEFORE INSERT OR UPDATE ON auth_credentials
+CREATE TRIGGER user_auth_credentials_check
+BEFORE INSERT OR UPDATE ON user_auth_credentials
 FOR EACH ROW EXECUTE FUNCTION check_email_or_phone();
