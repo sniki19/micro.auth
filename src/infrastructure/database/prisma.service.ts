@@ -1,4 +1,4 @@
-import { CustomLogger, CustomLoggerWithContext } from '@logger/logger.service'
+import { CustomLogger } from '@logger/logger.service'
 import { Injectable } from '@nestjs/common'
 import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { PrismaClient } from '@prisma/client'
@@ -6,13 +6,8 @@ import { PrismaClient } from '@prisma/client'
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-  private readonly logger: CustomLoggerWithContext
-
-  constructor(
-    private readonly customLogger: CustomLogger,
-  ) {
+  constructor(private readonly logger: CustomLogger) {
     super()
-    this.logger = this.customLogger.withContext(PrismaService.name)
   }
 
   async onModuleInit() {
@@ -20,9 +15,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     try {
       await this.$connect()
-      this.logger.info('✅ Database connection established successfully.')
+      this.logger.success('Database connection established successfully.')
     } catch (error: unknown) {
-      this.logger.error('❌ Failed to establish database connection.', { error })
+      this.logger.error('Failed to establish database connection.', { error })
       throw error
     }
   }
@@ -32,9 +27,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     try {
       await this.$disconnect()
-      this.logger.info('🟢 Database connection closed successfully.')
+      this.logger.success('Database connection closed successfully.')
     } catch (error: unknown) {
-      this.logger.error('⚠️ Error occurred while closing the database connection.', { error })
+      this.logger.error('Error occurred while closing the database connection.', { error })
       throw error
     }
   }
