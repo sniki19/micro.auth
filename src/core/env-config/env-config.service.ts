@@ -24,8 +24,58 @@ export class EnvConfigService implements OnModuleInit {
     }
   }
 
+  get APP_NAME() {
+    return this.config.get<string>('APP_NAME', 'micro.auth')
+  }
+
+  get APP_VERSION() {
+    return this.config.get<string>('APP_VERSION', '1.0.0')
+  }
+
+  get API_HOST() {
+    return this.config.get<string>('API_HOST', 'localhost')
+  }
+
   get API_PORT() {
     return this.config.get<number>('API_PORT', 3000)
+  }
+
+  get RPC_HOST() {
+    return this.config.get<string>('RPC_HOST', '0.0.0.0')
+  }
+
+  get RPC_PORT() {
+    return this.config.get<number>('RPC_PORT', 53000)
+  }
+
+  get DATABASE_HOST() {
+    return this.config.get<string>('DATABASE_HOST', '127.0.0.1')
+  }
+
+  get DATABASE_PORT() {
+    return this.config.get<number>('DATABASE_PORT', 5432)
+  }
+
+  get DATABASE_NAME() {
+    return this.config.get<string>('DATABASE_NAME', 'postgres')
+  }
+
+  get DATABASE_USER() {
+    return this.config.get<string>('DATABASE_USER', 'postgres')
+  }
+
+  get DATABASE_PASSWORD() {
+    return this.config.get<string>('DATABASE_PASSWORD', 'postgres')
+  }
+
+  get DATABASE_URL(): string {
+    const url = this.config.get<string>('DATABASE_URL')
+    if (!url) throw new Error('DATABASE_URL is required')
+    return url
+  }
+
+  get ARGON_MEMORY_COST() {
+    return this.config.get<number>('ARGON_MEMORY_COST')
   }
 
   get FINGERPRINT_SALT() {
@@ -48,22 +98,16 @@ export class EnvConfigService implements OnModuleInit {
     return this.config.get<string>('JWT_REFRESH_TOKEN_TTL', '1d')
   }
 
-  get DATABASE_URL(): string {
-    const url = this.config.get<string>('DATABASE_URL')
-    if (!url) throw new Error('DATABASE_URL is required')
-    return url
-  }
-
-  get ARGON_MEMORY_COST() {
-    return this.config.get<number>('ARGON_MEMORY_COST')
-  }
-
   get<T = any>(key: string): T | undefined {
     return this.config.get<T>(key)
   }
 
   private validateCoreVars() {
-    const coreVars = ['DATABASE_URL', 'JWT_ACCESS_TOKEN_SECRET', 'JWT_REFRESH_TOKEN_SECRET']
+    const coreVars = [
+      'DATABASE_URL',
+      'JWT_ACCESS_TOKEN_SECRET',
+      'JWT_REFRESH_TOKEN_SECRET'
+    ]
     const optionalVars = []
 
     const missingCoreVars = coreVars.filter(key => !this.config.get(key))

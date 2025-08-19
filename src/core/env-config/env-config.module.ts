@@ -8,12 +8,12 @@ import { EnvConfigService } from './env-config.service'
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `.env.${process.env.NODE_ENV || 'production'}`,
+      envFilePath: '.env',
       ignoreEnvFile: process.env.NODE_ENV === 'production',
       validationSchema: envValidationSchema,
       validationOptions: {
         abortEarly: false,
-        allowUnknown: true // TODO: false
+        allowUnknown: true
       },
       isGlobal: true
     })
