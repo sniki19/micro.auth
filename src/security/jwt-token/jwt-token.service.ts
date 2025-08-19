@@ -37,11 +37,11 @@ export class JwtTokenService {
 
   private verifyToken(token: string, type: TokenType): JwtTokenPayload {
     try {
-      this.logger.debug('Verifying token', { type })
+      this.logger.log('Verifying token', { type })
       const config = this.tokenConfigs[type]
       const payload = this.jwtService.verify<JwtTokenPayload>(token, { secret: config.secret })
 
-      this.logger.debug('Token verified successfully', { userId: payload.sub })
+      this.logger.log('Token verified successfully', { userId: payload.sub })
       return payload
     } catch (error: unknown) {
       this.logger.warn('Invalid or expired token', { error })
@@ -64,7 +64,7 @@ export class JwtTokenService {
 
   private generateToken(payload: JwtTokenPayload, type: TokenType): string {
     try {
-      this.logger.debug('Generating token', { type, payload: { sub: payload.sub } })
+      this.logger.log('Generating token', { type, payload: { sub: payload.sub } })
       const config = this.tokenConfigs[type]
       const token = this.jwtService.sign(payload, {
         ...config

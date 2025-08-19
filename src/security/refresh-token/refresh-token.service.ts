@@ -77,7 +77,7 @@ export class RefreshTokenService {
   }
 
   async validateToken(token: string): Promise<boolean> {
-    this.logger.debug('🛡️ Validating refresh token')
+    this.logger.log('🛡️ Validating refresh token')
 
     try {
       const { sub: userId } = this.jwtTokenService.verifyRefreshToken(token)

@@ -1,1 +1,1 @@
-export { ResponseInterceptor } from './response.interceptor'
+export { HttpResponseInterceptor } from './http.response.interceptor'

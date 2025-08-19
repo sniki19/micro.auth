@@ -8,7 +8,8 @@ export const createLoggerMock = (): jest.Mocked<CustomLogger> => {
     success: jest.fn(),
     debug: jest.fn(),
     warn: jest.fn(),
-    error: jest.fn()
+    error: jest.fn(),
+    critical: jest.fn()
   }
 
   const mockLogger = {

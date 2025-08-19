@@ -249,7 +249,7 @@ export class AuthService {
         })
         throw new UnauthorizedException('Account is temporarily blocked')
       } else {
-        this.logger.debug('Attempt to unblock user', { userId })
+        this.logger.log('Attempt to unblock user', { userId })
         await this.userSecuritySettingsService.unblockUser(userId)
       }
     }
