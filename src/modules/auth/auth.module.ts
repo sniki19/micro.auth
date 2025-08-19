@@ -8,8 +8,8 @@ import { RefreshTokenModule } from 'src/security/refresh-token/refresh-token.mod
 import { SessionModule } from 'src/security/session/session.module'
 import { JwtStrategy } from 'src/security/strategies/jwt.strategy'
 import { UserSecuritySettingsModule } from 'src/security/user-security-settings/user-security-settings.module'
-import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
+import { AuthController, AuthGrpcController } from './controllers'
 
 
 @Module({
@@ -23,7 +23,7 @@ import { AuthService } from './auth.service'
     OutboxModule,
     UserSecuritySettingsModule
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, AuthGrpcController],
   providers: [
     AuthService,
     JwtStrategy

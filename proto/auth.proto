@@ -3,6 +3,11 @@ syntax = "proto3";
 package auth;
 
 service AuthService {
+  rpc register(Empty) returns (GetRegisterResponse);
 }
 
 message Empty {}
+
+message GetRegisterResponse {
+  int32 code = 1;
+}

@@ -1,7 +1,10 @@
+import runGrpcServer from './grpc-server'
 import runHttpServer from './http-server'
 
 
 async function bootstrap() {
+  await runGrpcServer()
+
   await runHttpServer()
 }
 
