@@ -84,7 +84,8 @@ export default tseslint.config(
           ignoreMemberSort: false,
           memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single']
         }
-      ]
+      ],
+      'quotes': ['error', 'single', { 'avoidEscape': false, 'allowTemplateLiterals': false }]
     }
   },
   {
