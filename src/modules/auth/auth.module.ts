@@ -1,32 +1,34 @@
+import { AdvancedCommandBus, ICommandBus } from '@app/infrastructure/command-bus'
+import { SecurityModule } from '@app/security/security.module'
 import { Module } from '@nestjs/common'
+import { CqrsModule } from '@nestjs/cqrs'
 import { OutboxModule } from 'src/infrastructure/outbox/outbox.module'
 import { UserModule } from 'src/modules/user/user.module'
-import { JwtTokenModule } from 'src/security/jwt-token/jwt-token.module'
-import { PasswordModule } from 'src/security/password/password.module'
-import { RateLimitModule } from 'src/security/rate-limit/rate-limit.module'
-import { RefreshTokenModule } from 'src/security/refresh-token/refresh-token.module'
-import { SessionModule } from 'src/security/session/session.module'
 import { JwtStrategy } from 'src/security/strategies/jwt.strategy'
-import { UserSecuritySettingsModule } from 'src/security/user-security-settings/user-security-settings.module'
-import { AuthService } from './auth.service'
+import { LoginHandler, LogoutHandler, RefreshHandler, RegisterHandler } from './commands'
 import { AuthController, AuthGrpcController } from './controllers'
+import { AuthService } from './services'
 
+
+const services = [AuthService, JwtStrategy]
+const commandHandlers = [LoginHandler, LogoutHandler, RefreshHandler, RegisterHandler]
 
 @Module({
   imports: [
+    CqrsModule,
     UserModule,
-    JwtTokenModule,
-    PasswordModule,
-    RateLimitModule,
-    RefreshTokenModule,
-    SessionModule,
+    SecurityModule,
     OutboxModule,
-    UserSecuritySettingsModule
   ],
   controllers: [AuthController, AuthGrpcController],
   providers: [
-    AuthService,
-    JwtStrategy
+    ...services,
+    ...commandHandlers,
+    {
+      provide: ICommandBus,
+      useClass: AdvancedCommandBus
+    },
+    AdvancedCommandBus
   ]
 })
 export class AuthModule { }

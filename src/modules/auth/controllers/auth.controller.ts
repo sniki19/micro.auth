@@ -10,10 +10,8 @@ import {
 } from '@nestjs/swagger'
 import { CustomLogger, CustomLoggerWithContext } from 'src/infrastructure/logger/logger.service'
 import { Authorization, Authorized, BearerToken, ClientIp, UserAgent } from 'src/security/decorators'
-import { AuthService } from '../auth.service'
-import { AuthResponse } from '../dto/auth-response.dto'
-import { LoginRequest } from '../dto/login.dto'
-import { RegisterRequest } from '../dto/register.dto'
+import { AuthResponse, LoginRequest, RegisterRequest } from '../dto'
+import { AuthService } from '../services'
 
 
 @ApiTags('Authentication')
@@ -42,6 +40,7 @@ export class AuthController {
   @ApiConflictResponse({
     description: 'User already exists'
   })
+  // @Throttle(3, 300)
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(
@@ -70,6 +69,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized'
   })
+  // @Throttle(5, 60)
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(
