@@ -85,8 +85,6 @@ CREATE TABLE "user_auth_credentials" (
     "email" VARCHAR(255),
     "phone" VARCHAR(16),
     "password_hash" VARCHAR(1024) NOT NULL,
-    "is_active" BOOLEAN NOT NULL DEFAULT false,
-    "is_verified" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -95,15 +93,17 @@ CREATE TABLE "user_auth_credentials" (
 
 -- CreateTable
 CREATE TABLE "user_security_settings" (
-    "user_id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,    
+    "is_active" BOOLEAN NOT NULL DEFAULT false,
+    "is_verified" BOOLEAN NOT NULL DEFAULT false,
+    "account_blocked" BOOLEAN NOT NULL DEFAULT false,
+    "blocked_until" TIMESTAMP(3),
+    "block_reason" TEXT,
     "failed_login_attempts" INTEGER NOT NULL DEFAULT 0,
     "session_timeout" INTEGER,
     "login_notifications" BOOLEAN NOT NULL DEFAULT false,
     "two_factor_enabled" BOOLEAN NOT NULL DEFAULT false,
     "two_factor_method" "two_factor_method_enum",
-    "account_blocked" BOOLEAN NOT NULL DEFAULT false,
-    "blocked_until" TIMESTAMP(3),
-    "block_reason" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
