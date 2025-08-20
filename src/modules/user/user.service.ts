@@ -69,11 +69,12 @@ export class UserService {
     return dbClient.userAuthCredentials.create({
       data: {
         ...payload,
-        isActive: true,
 
         userSecuritySettings: {
           create: {
-            loginNotifications: true
+            loginNotifications: true,
+            isActive: true,
+            isVerified: false
           }
         }
       }
