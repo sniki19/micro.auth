@@ -27,6 +27,7 @@ export default tseslint.config(
       }
     }
   },
+  prettierConfig,
   {
     plugins: {
       import: eslintPluginImport,
@@ -97,5 +98,4 @@ export default tseslint.config(
       '@typescript-eslint/unbound-method': 'off'
     }
   }
-  // prettierConfig
 )
