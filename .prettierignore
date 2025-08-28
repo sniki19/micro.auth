@@ -1,0 +1,9 @@
+dist
+docker
+prisma
+proto
+build
+coverage
+node_modules
+.vscode
+.husky

@@ -3,22 +3,29 @@ import eslint from '@eslint/js'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import prettierConfig from 'eslint-config-prettier'
 import eslintPluginImport from 'eslint-plugin-import'
 
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '*.js',
+      '*.cjs',
+      '*.mjs',
+      '*.d.ts',
+      'eslint.config.mjs'
+    ]
   },
+  eslintPluginPrettierRecommended,
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
-  eslintPluginPrettierRecommended,
   {
     languageOptions: {
       globals: {
         ...globals.node,
-        ...globals.jest,
+        ...globals.jest
       },
       sourceType: 'commonjs',
       parserOptions: {
@@ -27,15 +34,14 @@ export default tseslint.config(
       }
     }
   },
-  prettierConfig,
   {
     plugins: {
-      import: eslintPluginImport,
+      import: eslintPluginImport
     },
     rules: {
-      'semi': ['warn', 'never'],
+      semi: ['warn', 'never'],
       'import/newline-after-import': ['error', { count: 2 }],
-      'no-multiple-empty-lines': ['error', { 'max': 2, 'maxEOF': 1 }],
+      'no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1 }],
       'prettier/prettier': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
@@ -49,7 +55,7 @@ export default tseslint.config(
       'import/order': [
         'error',
         {
-          'groups': [
+          groups: [
             'builtin',
             'external',
             'internal',
@@ -58,7 +64,7 @@ export default tseslint.config(
             'index'
           ],
           'newlines-between': 'never',
-          'alphabetize': {
+          alphabetize: {
             order: 'asc',
             caseInsensitive: true
           }
@@ -86,10 +92,10 @@ export default tseslint.config(
           memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single']
         }
       ],
-      'quotes': ['error', 'single', { 'avoidEscape': false, 'allowTemplateLiterals': false }],
+      quotes: ['error', 'single', { avoidEscape: false, allowTemplateLiterals: false }],
       'eol-last': ['warn', 'always'],
       'prefer-const': 'error',
-      'eqeqeq': 'error'
+      eqeqeq: 'error'
     }
   },
   {

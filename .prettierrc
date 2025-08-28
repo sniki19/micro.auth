@@ -1,14 +1,13 @@
 {
   "semi": false,
   "singleQuote": true,
-  "trailingComma": "es5",
+  "tabWidth": 2,
+  "trailingComma": "none",
   "endOfLine": "auto",
-  "printWidth": 100,
+  "printWidth": 120,
   "overrides": [
     {
-      "files": [
-        "*.ts"
-      ],
+      "files": ["*.ts"],
       "options": {
         "printWidth": 120
       }

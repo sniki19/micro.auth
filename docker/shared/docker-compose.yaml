@@ -1,4 +1,4 @@
-name: logistics_auth
+name: micro_auth
 
 networks:
   micro_network:

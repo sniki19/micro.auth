@@ -1,0 +1,3 @@
+echo "🚀 Running pre-push checks..."
+npx lint-staged
+npm run build
