@@ -1,9 +1,10 @@
-name: micro_auth
+name: ${DOCKER_MODULE_NAME}
 
 networks:
-  micro_network:
+  app_network:
     driver: bridge
     external: true
+    name: ${APP_NETWORK_NAME}
 
 include:
   - ./docker-compose.database.yaml

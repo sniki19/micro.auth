@@ -1,11 +1,17 @@
-volumes:
-  runesteel_overlord_si1:
+networks:
+  app_network:
+    driver: bridge
     external: true
+    name: ${APP_NETWORK_NAME}
+
+volumes:
+  database_data:
+    name: ${DATABASE_VOLUME_NAME}
 
 services:
-  db_runesteel_overlord:
+  database:
     image: postgres:latest
-    container_name: db_runesteel_overlord
+    container_name: ${DATABASE_CONTAINER_NAME}
     restart: unless-stopped
     ports:
       - ${DATABASE_PORT}:5432
@@ -23,6 +29,6 @@ services:
       TZ: UTC
       PGTZ: UTC
     volumes:
-      - runesteel_overlord_si1:/var/lib/postgresql/data
+      - database_data:/var/lib/postgresql/data
     networks:
-      - micro_network
+      - app_network

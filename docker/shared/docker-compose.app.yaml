@@ -1,10 +1,17 @@
+networks:
+  app_network:
+    driver: bridge
+    external: true
+    name: ${APP_NETWORK_NAME}
+
 volumes:
-  ninja_minotaur_logs:
+  microservice_logs:
+    name: ${MICROSERVICE_LOGS_VOLUME_NAME}
 
 services:
-  app_ninja_minotaur:
+  microservice:
     image: ${APP_NAME}:latest
-    container_name: app_ninja_minotaur
+    container_name: ${MICROSERVICE_CONTAINER_NAME}
     restart: unless-stopped
     build:
       context: .
@@ -13,7 +20,7 @@ services:
       - ${API_PORT}:${API_PORT}
       - ${RPC_PORT}:${RPC_PORT}
     depends_on:
-      db_runesteel_overlord:
+      database:
         condition: service_healthy
         restart: true
     env_file:
@@ -24,6 +31,6 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?schema=public&timezone=UTC
     volumes:
-      - ninja_minotaur_logs:/app/logs
+      - microservice_logs:/app/logs
     networks:
-      - micro_network
+      - app_network
